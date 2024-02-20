@@ -11,16 +11,14 @@ public class Commands {
     public Commands(TwitchChat pChat) {
         chat = pChat;
     }
-    private void say() {
-        chat.getEventManager().onEvent(ChannelMessageEvent.class, event -> {
+    public void say(ChannelMessageEvent event) {
+        if (!event.getMessage().toString().startsWith("!say")) return;
+        chat.sendMessage("redsmiletv", event.getMessage().toString().substring(5));
+    }
 
-
-            if (event.getMessage().toString().startsWith("!say")) {
-                chat.sendMessage("redsmiletv", event.getMessage().toString().substring(5));
-            }
-        });
-
-
+    public void weather(ChannelMessageEvent event) {
+        if (!event.getMessage().toString().startsWith("!weather")) return;
+        chat.sendMessage("redsmiletv", "The weather is nice today");
     }
 
 

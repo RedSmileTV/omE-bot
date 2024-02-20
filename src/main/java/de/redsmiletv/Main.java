@@ -1,6 +1,8 @@
 package de.redsmiletv;
 
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
+import com.github.philippheuer.events4j.api.domain.IEventSubscription;
+import com.github.philippheuer.events4j.core.EventManager;
 import com.github.philippheuer.events4j.simple.SimpleEventHandler;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
@@ -17,38 +19,19 @@ import java.util.Properties;
 
 public class Main {
     // Temp credentials, will be replaced with .env or .properties file
-    private static String TOKEN;
-    private static String CHANNEL_NAME;
-    public static TwitchClient twitchClient;
-    private static Commands commands;
+    public TwitchClient twitchClient;
+    private String TOKEN;
+    private String CHANNEL_NAME;
+    private Commands commands;
+
     public static void main(String[] args) {
-        init();
-        run();
+        new Main().run();
 
-
-        // For listening messages like commands example !lol
+        // Need to check on that later
         //twitchClient.getClientHelper().enableStreamEventListener("redsmiletv");
-
-        //TwitchChat chat = twitchClient.getChat();
-
-        //chat.joinChannel("redsmiletv");
-        //chat.sendMessage("redsmiletv", "omE");
-
-//
-//        chat.getEventManager().onEvent(ChannelMessageEvent.class, event -> {
-//
-//            System.out.println(event.getUser() + ": " + event.getMessage().toString());
-//
-//            if (event.getMessage().toString().startsWith("!say")) {
-//                chat.sendMessage("redsmiletv", event.getMessage().toString().substring(5));
-//                //chat.sendMessage("redsmiletv", "omE");
-//            }
-//        });
-
-
     }
 
-    private static void init() {
+    private void init() {
         File file = new File("src/main/resources/.env");
         Properties properties = new Properties();
 
@@ -61,11 +44,11 @@ public class Main {
         TOKEN = properties.getProperty("TOKEN");
         CHANNEL_NAME = properties.getProperty("CHANNEL_NAME");
 
-
-
     }
 
-    public static void run() {
+    private void run() {
+        init();
+
         OAuth2Credential credential = new OAuth2Credential("twitch", TOKEN);
         twitchClient = TwitchClientBuilder.builder()
                 .withDefaultAuthToken(credential)
@@ -76,13 +59,20 @@ public class Main {
                 .build();
 
 
-        commands = new Commands(twitchClient.getChat());
-
         twitchClient.getChat().joinChannel(CHANNEL_NAME);
-        twitchClient.getChat().sendMessage(CHANNEL_NAME, "omE");
+        twitchClient.getChat().sendMessage(CHANNEL_NAME, "Bot ist jetzt da!");
+
+        commands = new Commands(twitchClient.getChat());
+        startEvents();
     }
 
-    public static TwitchClient getTwitchClient() {
-        return twitchClient;
+    private void startEvents() {
+        EventManager eventManager = twitchClient.getEventManager();
+
+        eventManager.onEvent(ChannelMessageEvent.class, event -> {
+            commands.say(event);
+            commands.weather(event);
+        });
+
     }
 }
