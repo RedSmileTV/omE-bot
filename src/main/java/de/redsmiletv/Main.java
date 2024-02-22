@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class Main {
-    // Temp credentials, will be replaced with .env or .properties file
     public TwitchClient twitchClient;
     private String TOKEN;
     private String CHANNEL_NAME;
@@ -26,6 +25,8 @@ public class Main {
 
     public static void main(String[] args) {
         new Main().run();
+
+        // TODO test a Swing UI to control the bot
 
         // Need to check on that later
         //twitchClient.getClientHelper().enableStreamEventListener("redsmiletv");
@@ -72,6 +73,7 @@ public class Main {
         eventManager.onEvent(ChannelMessageEvent.class, event -> {
             commands.say(event);
             commands.weather(event);
+            commands.randomOmE(event);
         });
 
     }
