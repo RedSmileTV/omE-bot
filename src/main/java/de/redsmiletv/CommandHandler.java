@@ -15,10 +15,18 @@ public class CommandHandler {
         commands.put(command.getCommand(), command);
     }
 
-    public void executeCommand(String command, String... args) {
-        if (commands.containsKey(command)) {
-            getCommand(command).execute(args);
-        }
+    public void executeCommand(ChannelMessageEvent event, String command, String... args) {
+        if (commands.containsKey(command)) getCommand(command).execute(event, args);
+    }
+
+    public void handleCommand(ChannelMessageEvent event) {
+        String message = event.getMessage();
+        if (!message.startsWith("!")) return;
+        String[] split = message.split(" ");
+        String command = split[0].substring(1);
+        String[] args = new String[split.length - 1];
+        System.arraycopy(split, 1, args, 0, split.length - 1);
+        executeCommand(event, command, args);
     }
 
     public HashMap<String, Command> getCommands() {
@@ -29,19 +37,10 @@ public class CommandHandler {
         return commands.get(command);
     }
 
+
+
     public void removeCommand(String command) {
         commands.remove(command);
-    }
-
-    public void handleCommand(ChannelMessageEvent event) {
-        String message = event.getMessage().toLowerCase();
-        if (message.startsWith("!")) {
-            String[] split = message.split(" ");
-            String command = split[0].substring(1);
-            String[] args = new String[split.length - 1];
-            System.arraycopy(split, 1, args, 0, split.length - 1);
-            executeCommand(command, args);
-        }
     }
 
 }
